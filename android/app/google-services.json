@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "746696147980",
+    "project_id": "escapelife-project",
+    "storage_bucket": "escapelife-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746696147980:android:946c37efe39862052c9a29",
+        "android_client_info": {
+          "package_name": "io.adgomezm.escapelife"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "746696147980-m2mf0s7vvs4bbig8hgkcmgmdskmto9up.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDejl0wsLjHQxIr14XRLV6Vm7Oc6-AuZQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "746696147980-m2mf0s7vvs4bbig8hgkcmgmdskmto9up.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
