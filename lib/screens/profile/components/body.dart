@@ -1,16 +1,14 @@
+import 'package:escape_life/db/entities/usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/constants.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class Body extends StatelessWidget {
-  const Body({
-    Key key,
-    this.nombre,
-  }) : super(key: key);
-  final String nombre;
-
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<Usuario>(context);
+
     // It will provie us total height  and width of our screen
     Size size = MediaQuery.of(context).size;
     // it enable scrolling on small device
@@ -51,7 +49,7 @@ class Body extends StatelessWidget {
                                 height: 40,
                               ),
                               Text(
-                                nombre ?? "",
+                                user.nombre ?? "",
                                 style: GoogleFonts.roboto(
                                   fontSize: 20,
                                   color: kSecondaryColor,

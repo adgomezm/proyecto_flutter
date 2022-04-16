@@ -31,9 +31,7 @@ class _NavigationDrawerWidgetState extends State<NavigationDrawerWidget> {
             children: <Widget>[
               buildHeader(onClicked: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ProfileScreen(
-                    nombre: user.nombre,
-                  ),
+                  builder: (context) => ProfileScreen(),
                 ));
               }),
               Container(

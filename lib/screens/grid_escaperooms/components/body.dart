@@ -68,14 +68,23 @@ class _RecomendERCardState extends State<RecomendERCard> {
   }
 
   Widget buildContent(List<Escaperoom> escaperooms) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: escaperooms.length,
-      itemBuilder: (BuildContext context, int index) {
-        final escaperoom = escaperooms[index];
-
-        return buildEscapeRoom(context, escaperoom);
-      },
+    return Container(
+      padding: EdgeInsets.only(
+        right: kDefaultPadding / 2,
+        left: kDefaultPadding / 2,
+        top: kDefaultPadding / 2,
+      ),
+      child: GridView.count(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        shrinkWrap: true,
+        children: escaperooms
+            .map(
+              (escaperoom) => buildEscapeRoom(context, escaperoom),
+            )
+            .toList(),
+      ),
     );
   }
 
@@ -88,47 +97,44 @@ class _RecomendERCardState extends State<RecomendERCard> {
     Size size = MediaQuery.of(context).size;
     return Column(
       children: <Widget>[
-        FutureBuilder(
-          future: storage.downloadURL(escaperoom.imagen),
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.hasData) {
-              return Container(
-                margin: EdgeInsets.only(
-                  left: kDefaultPadding,
-                  right: kDefaultPadding,
-                  top: kDefaultPadding / 2,
-                ),
-                width: 300,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailsScreen(
-                          title: escaperoom.nombre,
-                          country: escaperoom.ciudad,
-                          price: escaperoom.precio,
-                          image: escaperoom.imagen,
+        Flexible(
+          child: FutureBuilder(
+            future: storage.downloadURL(escaperoom.imagen),
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return SizedBox(
+                  width: 300,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailsScreen(
+                            title: escaperoom.nombre,
+                            country: escaperoom.ciudad,
+                            price: escaperoom.precio,
+                            image: escaperoom.imagen,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: Image.network(
-                    snapshot.data,
-                    width: 300,
-                    height: size.height * 0.25,
-                    fit: BoxFit.fill,
+                      );
+                    },
+                    child: Image.network(
+                      snapshot.data,
+                      width: 200,
+                      height: size.height * 0.2,
+                      fit: BoxFit.fill,
+                    ),
                   ),
-                ),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.waiting &&
-                !snapshot.hasData) {
-              return CircularProgressIndicator();
-            }
-            return Container();
-          },
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  !snapshot.hasData) {
+                return CircularProgressIndicator();
+              }
+              return Container();
+            },
+          ),
         ),
         GestureDetector(
           onTap: () {
@@ -145,8 +151,9 @@ class _RecomendERCardState extends State<RecomendERCard> {
             );
           },
           child: Container(
+            clipBehavior: Clip.hardEdge,
             padding: EdgeInsets.all(kDefaultPadding / 2),
-            width: 300,
+            width: 200,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -163,22 +170,24 @@ class _RecomendERCardState extends State<RecomendERCard> {
             ),
             child: Row(
               children: <Widget>[
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                          text: escaperoom.nombre.toUpperCase(),
-                          style: Theme.of(context).textTheme.button),
-                      TextSpan(
-                        text: "\n".toUpperCase(),
-                      ),
-                      TextSpan(
-                        text: escaperoom.ciudad.toUpperCase(),
-                        style: TextStyle(
-                          color: kSecondaryColor,
+                Flexible(
+                  child: RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: escaperoom.nombre.toUpperCase(),
+                            style: Theme.of(context).textTheme.button),
+                        TextSpan(
+                          text: "\n".toUpperCase(),
                         ),
-                      ),
-                    ],
+                        TextSpan(
+                          text: escaperoom.ciudad.toUpperCase(),
+                          style: TextStyle(
+                            color: kSecondaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

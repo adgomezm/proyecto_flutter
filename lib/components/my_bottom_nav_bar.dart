@@ -1,5 +1,5 @@
+import 'package:escape_life/screens/edit_profile/edit_profile.dart';
 import 'package:escape_life/screens/home/home_screen.dart';
-import 'package:escape_life/screens/login/login_screen.dart';
 import 'package:escape_life/screens/profile/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +75,7 @@ class _MyBottomNavBarState extends State<MyBottomNavBar> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(),
+                    builder: (context) => EditProfile(),
                   ),
                 );
               }),

@@ -1,13 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:escape_life/components/navigation_drawer_widget.dart';
 import 'package:escape_life/db/entities/escaperoom.dart';
-import 'package:escape_life/db/entities/usuario.dart';
-import 'package:escape_life/screens/login/login_screen.dart';
+import 'package:escape_life/screens/edit_profile/edit_profile.dart';
 import 'package:escape_life/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/screens/home/components/body.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import '../../../constants.dart';
 import 'package:escape_life/db/firebase/database.dart';
@@ -26,13 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
     pageList.add(Body());
     //pagina de favoritos
     pageList.add(ProfileScreen());
-    pageList.add(LoginScreen());
+    pageList.add(EditProfile());
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamProvider<List<Escaperoom>>.value(
+      initialData: null,
       value: DatabaseService().escaperooms,
       child: Scaffold(
         appBar: buildAppBar(),
