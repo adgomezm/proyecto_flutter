@@ -1,5 +1,6 @@
 import 'package:escape_life/components/text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RoundedInputField extends StatelessWidget {
   final String hintText;
@@ -23,7 +24,7 @@ class RoundedInputField extends StatelessWidget {
         validator: validator,
         controller: controller,
         onChanged: onChanged,
-        style: TextStyle(color: Colors.white),
+        style: GoogleFonts.ubuntu(color: Colors.white),
         decoration: InputDecoration(
           icon: Icon(
             icon,

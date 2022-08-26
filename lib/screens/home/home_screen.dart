@@ -1,17 +1,19 @@
+import 'package:escape_life/components/app_bar.dart';
 import 'package:escape_life/components/navigation_drawer_widget.dart';
 import 'package:escape_life/db/entities/escaperoom.dart';
-import 'package:escape_life/screens/edit_profile/edit_profile.dart';
-import 'package:escape_life/screens/profile/profile_screen.dart';
+import 'package:escape_life/db/entities/reserve.dart';
+import 'package:escape_life/db/entities/usuario.dart';
+import 'package:escape_life/screens/profile/profile.dart';
+import 'package:escape_life/screens/public_profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/screens/home/components/body.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../constants.dart';
 import 'package:escape_life/db/firebase/database.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -22,18 +24,32 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     pageList.add(Body());
     //pagina de favoritos
-    pageList.add(ProfileScreen());
-    pageList.add(EditProfile());
+    pageList.add(PublicProfileScreen(
+      escaperooms: const [],
+    ));
+    pageList.add(Profile());
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<List<Escaperoom>>.value(
-      initialData: null,
-      value: DatabaseService().escaperooms,
+    return MultiProvider(
+      providers: [
+        StreamProvider<List<Escaperoom>>.value(
+          initialData: null,
+          value: DatabaseService().escaperooms,
+        ),
+        StreamProvider<List<Usuario>>.value(
+          initialData: null,
+          value: DatabaseService().usuarios,
+        ),
+        StreamProvider<List<Reserve>>.value(
+          initialData: null,
+          value: DatabaseService().reserves,
+        ),
+      ],
       child: Scaffold(
-        appBar: buildAppBar(),
+        appBar: AppBarComponent().buildAppBar(),
         drawer: NavigationDrawerWidget(),
         body: IndexedStack(
           index: _selectedPage,
@@ -64,31 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         ),
-      ),
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: kPrimaryColor,
-      centerTitle: true,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Escape Life',
-            style: GoogleFonts.specialElite(
-              fontSize: 20,
-              color: Colors.white,
-            ),
-          ),
-          Image.asset(
-            "assets/images/lockt.png",
-            width: 40,
-            height: 40,
-          ),
-        ],
       ),
     );
   }

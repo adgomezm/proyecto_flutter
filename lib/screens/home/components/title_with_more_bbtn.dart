@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../constants.dart';
 
@@ -31,7 +32,7 @@ class TitleWithMoreBtn extends StatelessWidget {
             onPressed: press,
             child: Text(
               "Ver más",
-              style: TextStyle(color: kSecondaryColor),
+              style: GoogleFonts.ubuntu(color: kSecondaryColor),
             ),
           ),
         ],
@@ -58,7 +59,7 @@ class TitleWithCustomUnderline extends StatelessWidget {
             padding: const EdgeInsets.only(left: kDefaultPadding / 4),
             child: Text(
               text,
-              style: TextStyle(
+              style: GoogleFonts.ubuntu(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

@@ -6,8 +6,9 @@ class IconCard extends StatelessWidget {
   const IconCard({
     Key key,
     this.icon,
+    this.onPressed,
   }) : super(key: key);
-
+  final Function() onPressed;
   final IconData icon;
 
   @override
@@ -15,9 +16,9 @@ class IconCard extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return Container(
       margin: EdgeInsets.symmetric(vertical: size.height * 0.03),
-      padding: EdgeInsets.all(kDefaultPadding / 2),
-      height: 62,
-      width: 62,
+      padding: EdgeInsets.all(kDefaultPadding / 4),
+      height: 50,
+      width: 50,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(5),
@@ -34,9 +35,11 @@ class IconCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        icon,
+      child: IconButton(
+        splashRadius: 1,
+        icon: Icon(icon, color: kSecondaryColor),
         color: kSecondaryColor,
+        onPressed: onPressed,
       ),
     );
   }

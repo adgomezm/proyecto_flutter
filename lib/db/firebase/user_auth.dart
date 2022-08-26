@@ -8,7 +8,12 @@ class AuthService {
   // create user obj based on firebase user
   Usuario _userFromFirebaseUser(User user) {
     return user != null
-        ? Usuario(id: user.uid, email: user.email, nombre: user.displayName)
+        ? Usuario(
+            id: user.uid,
+            email: user.email,
+            nombre: user.displayName,
+            urlImagen: 'imagenDefault.png',
+          )
         : null;
   }
 
@@ -27,7 +32,6 @@ class AuthService {
       User user = result.user;
       return _userFromFirebaseUser(user);
     } catch (e) {
-      print(e.toString());
       return null;
     }
   }
@@ -41,26 +45,33 @@ class AuthService {
 
       return user;
     } catch (error) {
-      print(error.toString());
       return null;
     }
   }
 
   // register with email and password
   Future registerWithEmailAndPassword(
-      String nombre, String email, String password) async {
+      String nombre, String email, String password,
+      {List<String> opcionesSeleccionadas,
+      bool isAdmin,
+      String empresa}) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
-
-      await DatabaseService().addUserData(user.uid, nombre, email);
+      if (isAdmin == null) {
+        await DatabaseService().addUserData(user.uid, nombre, email,
+            opcionesSeleccionadas: opcionesSeleccionadas,
+            isAdmin: false,
+            empresa: null);
+      } else {
+        await DatabaseService().addUserData(user.uid, nombre, email,
+            isAdmin: isAdmin, empresa: empresa, opcionesSeleccionadas: []);
+      }
 
       await updateUserName(nombre, user);
-      print(user.displayName);
       return _userFromFirebaseUser(user);
     } catch (error) {
-      print(error.toString());
       return null;
     }
   }
@@ -70,12 +81,36 @@ class AuthService {
     await currentUser.reload();
   }
 
+  Future<String> changePassword(String newPassword) async {
+    User user = FirebaseAuth.instance.currentUser;
+
+    Map<String, String> codeResponses = {
+      // Re-auth responses
+      "user-mismatch": null,
+      "user-not-found": null,
+      "invalid-credential": null,
+      "invalid-email": null,
+      "wrong-password": null,
+      "invalid-verification-code": null,
+      "invalid-verification-id": null,
+      // Update password error codes
+      "weak-password": null,
+      "requires-recent-login": null
+    };
+
+    try {
+      await user.updatePassword(newPassword);
+      return null;
+    } on FirebaseAuthException catch (error) {
+      return codeResponses[error.code] ?? "Unknown";
+    }
+  }
+
   // sign out
   Future signOut() async {
     try {
       return await _auth.signOut();
     } catch (error) {
-      print(error.toString());
       return null;
     }
   }

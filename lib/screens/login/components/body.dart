@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 import 'package:escape_life/components/my_divider.dart';
-import 'package:escape_life/components/or_divider.dart';
 import 'package:escape_life/db/firebase/user_auth.dart';
 import 'package:escape_life/components/round_button.dart';
 import 'package:escape_life/components/rounded_input_field.dart';
@@ -14,7 +13,7 @@ import '../../../constants.dart';
 
 class Body extends StatefulWidget {
   @override
-  _BodyState createState() => _BodyState();
+  State<Body> createState() => _BodyState();
 }
 
 class _BodyState extends State<Body> {
@@ -63,7 +62,8 @@ class _BodyState extends State<Body> {
             RoundedInputField(
               controller: emailController,
               hintText: "Correo electrónico",
-              validator: (value) => value.isEmpty ? 'Enter an email' : null,
+              validator: (value) =>
+                  value.isEmpty ? 'Introduce un email valido' : null,
               onChanged: (value) {
                 setState(() => email = value);
               },
@@ -71,8 +71,10 @@ class _BodyState extends State<Body> {
             ),
             RoundPassInput(
               controller: passController,
-              validator: (value) =>
-                  value.length < 6 ? 'Enter a password' : null,
+              hintText: "Contraseña",
+              validator: (value) => value.length < 6
+                  ? 'La contraseña debe de contener más de 6 caracteres'
+                  : null,
               onChanged: (value) {
                 setState(() => password = value);
               },
@@ -85,15 +87,18 @@ class _BodyState extends State<Body> {
                       await _auth.signInWithEmailAndPassword(email, password);
                   if (result == null) {
                     setState(() {
-                      error = 'Could not sign in with those credentials';
+                      error = 'Hubo un error';
                     });
                   } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreen(),
-                      ),
-                    );
+                    if (mounted) {
+                      final navigator = Navigator.of(context);
+                      await showDialog(
+                        context: context,
+                        builder: (_) => HomeScreen(),
+                      );
+
+                      navigator.pop();
+                    }
                   }
                 }
               },
@@ -108,24 +113,6 @@ class _BodyState extends State<Body> {
                   ),
                 );
               },
-            ),
-            OrDivider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
-                ),
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
-                ),
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
-                ),
-              ],
             ),
           ],
         ),

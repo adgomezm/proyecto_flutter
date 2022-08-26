@@ -6,7 +6,7 @@ class Storage {
 
   Future<String> downloadURL(String img) async {
     String downloadURL = await firebase_storage.FirebaseStorage.instance
-        .ref('assets/$img.png')
+        .ref('assets/$img')
         .getDownloadURL();
     return downloadURL;
   }

@@ -1,4 +1,5 @@
 import 'package:escape_life/db/entities/escaperoom.dart';
+import 'package:escape_life/db/entities/usuario.dart';
 import 'package:escape_life/db/firebase/database.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/screens/details/details_screen.dart';
@@ -9,7 +10,19 @@ import 'package:escape_life/db/firebase/storage.dart';
 
 class Body extends StatefulWidget {
   @override
-  _BodyState createState() => _BodyState();
+  State<Body> createState() => _BodyState();
+  const Body({
+    this.escaperoomSearch,
+    this.escaperooms,
+    this.user,
+    this.filtro,
+    this.preferencias,
+  });
+  final bool preferencias;
+  final String filtro;
+  final Usuario user;
+  final List<Escaperoom> escaperooms;
+  final List<Escaperoom> escaperoomSearch;
 }
 
 class _BodyState extends State<Body> {
@@ -20,14 +33,30 @@ class _BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<List<Escaperoom>>.value(
-      initialData: null,
-      value: DatabaseService().escaperooms,
+    List<Escaperoom> escaperooms = widget.escaperoomSearch.isEmpty
+        ? widget.escaperooms
+        : widget.escaperoomSearch;
+
+    List<Escaperoom> escaperoomPR = [];
+    for (var element in widget.user.opcionesSeleccionadas) {
+      for (var escaperoom in escaperooms) {
+        if ((escaperoom.etiquetas.contains(element) ||
+                element == escaperoom.dificultad) &&
+            !escaperoomPR.contains(escaperoom)) {
+          escaperoomPR.add(escaperoom);
+        }
+      }
+    }
+    List<Escaperoom> escaperoomF =
+        widget.preferencias ? escaperoomPR : escaperooms;
+
+    return Provider<List<Escaperoom>>.value(
+      value: escaperoomF,
       child: SingleChildScrollView(
         child: Row(
           children: <Widget>[
             /*Recoger nombre y datos de cada ER de la DB*/
-            RecomendERCard(),
+            RecomendERCard(user: widget.user, filtro: widget.filtro),
           ],
         ),
       ),
@@ -37,25 +66,81 @@ class _BodyState extends State<Body> {
 
 class RecomendERCard extends StatefulWidget {
   @override
-  _RecomendERCardState createState() => _RecomendERCardState();
+  State<RecomendERCard> createState() => _RecomendERCardState();
+  const RecomendERCard({
+    this.user,
+    this.filtro,
+  });
+  final String filtro;
+  final Usuario user;
 }
 
 class _RecomendERCardState extends State<RecomendERCard> {
   @override
   Widget build(BuildContext context) {
-    final escaperooms = Provider.of<List<Escaperoom>>(context);
+    final escaperoomsDB = Provider.of<List<Escaperoom>>(context);
+    List<Escaperoom> escaperooms;
+    bool existe;
+    switch (widget.filtro) {
+      case "completadas":
+        for (var element in widget.user.completadas) {
+          for (var escaperoom in escaperoomsDB) {
+            if (escaperoom.id == element) {
+              existe = true;
+              break;
+            }
+          }
+          !existe
+              ? DatabaseService()
+                  .removeArrayData("completadas", element, widget.user.uid)
+              : null;
+          existe = false;
+        }
+        escaperooms = escaperoomsDB
+            .where((element) => widget.user.completadas.contains(element.id))
+            .toList();
+
+        break;
+      case "favoritas":
+        for (var element in widget.user.favoritas) {
+          existe = false;
+          for (var escaperoom in escaperoomsDB) {
+            if (escaperoom.id == element) {
+              existe = true;
+              break;
+            }
+          }
+          !existe
+              ? DatabaseService()
+                  .removeArrayData("favoritas", element, widget.user.uid)
+              : null;
+        }
+        escaperooms = escaperoomsDB
+            .where((element) => widget.user.favoritas.contains(element.id))
+            .toList();
+        break;
+      default:
+        escaperooms = escaperoomsDB;
+    }
+
     Size size = MediaQuery.of(context).size;
 
-    if (escaperooms == null) {
-      return SizedBox(
-        height: 400.0,
-        child: Text(
-          'No escaperooms yet!',
-          style: GoogleFonts.specialElite(
-            fontSize: 20,
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.center,
+    if (escaperooms == null || escaperooms.isEmpty) {
+      return Expanded(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 200,
+            ),
+            Text(
+              'No hay escaperooms',
+              style: GoogleFonts.specialElite(
+                fontSize: 20,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     } else {
@@ -111,19 +196,27 @@ class _RecomendERCardState extends State<RecomendERCard> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetailsScreen(
-                            title: escaperoom.nombre,
-                            country: escaperoom.ciudad,
-                            price: escaperoom.precio,
-                            image: escaperoom.imagen,
+                            escaperoom: escaperoom,
+                            user: widget.user,
                           ),
                         ),
                       );
                     },
-                    child: Image.network(
-                      snapshot.data,
-                      width: 200,
-                      height: size.height * 0.2,
-                      fit: BoxFit.fill,
+                    child: Container(
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                        ),
+                      ),
+                      child: Image.network(
+                        snapshot.data,
+                        width: 200,
+                        height: size.height * 0.2,
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
                 );
@@ -142,10 +235,8 @@ class _RecomendERCardState extends State<RecomendERCard> {
               context,
               MaterialPageRoute(
                 builder: (context) => DetailsScreen(
-                  title: escaperoom.nombre,
-                  country: escaperoom.ciudad,
-                  price: escaperoom.precio,
-                  image: escaperoom.imagen,
+                  escaperoom: escaperoom,
+                  user: widget.user,
                 ),
               ),
             );
@@ -182,7 +273,7 @@ class _RecomendERCardState extends State<RecomendERCard> {
                         ),
                         TextSpan(
                           text: escaperoom.ciudad.toUpperCase(),
-                          style: TextStyle(
+                          style: GoogleFonts.ubuntu(
                             color: kSecondaryColor,
                           ),
                         ),

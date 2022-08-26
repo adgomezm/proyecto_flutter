@@ -1,12 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:escape_life/db/entities/usuario.dart';
 import 'package:escape_life/prueba/onboarding_page.dart';
 import 'package:escape_life/screens/home/home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/constants.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:splashscreen/splashscreen.dart';
 import 'db/firebase/user_auth.dart';
 
 Future<void> main() async {
@@ -31,7 +31,24 @@ class MyApp extends StatelessWidget {
           textTheme: Theme.of(context).textTheme.apply(bodyColor: kTextColor),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: AuthenticationWrapper(),
+        home: SplashScreen(
+          useLoader: false,
+          seconds: 3,
+          image: Image.asset(
+            "assets/images/lockt.png",
+            width: 600,
+            height: 600,
+          ),
+          title: Text('Escape Life',
+              style: GoogleFonts.specialElite(
+                fontSize: 40,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center),
+          backgroundColor: kBackgroundColor,
+          photoSize: 100,
+          navigateAfterSeconds: AuthenticationWrapper(),
+        ),
       ),
     );
   }

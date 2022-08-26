@@ -1,204 +1,102 @@
+import 'package:escape_life/components/button_widget.dart';
 import 'package:escape_life/db/entities/usuario.dart';
+import 'package:escape_life/screens/profile/components/ajustes_usuario.dart';
+import 'package:escape_life/screens/profile/components/profile_widget.dart';
+import 'package:escape_life/screens/grid_escaperooms/grid_escaperooms.dart';
 import 'package:flutter/material.dart';
-import 'package:escape_life/constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class Body extends StatelessWidget {
+import '../../../db/entities/escaperoom.dart';
+
+class Body extends StatefulWidget {
+  @override
+  State<Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<Usuario>(context);
+    final escaperooms = Provider.of<List<Escaperoom>>(context);
+    final usuarios = Provider.of<List<Usuario>>(context) ?? [];
+    final usuario = Provider.of<Usuario>(context);
+    final Usuario user =
+        usuarios.singleWhere((i) => i.id == usuario.id, orElse: () => null);
 
-    // It will provie us total height  and width of our screen
-    Size size = MediaQuery.of(context).size;
-    // it enable scrolling on small device
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kDefaultPadding,
-          vertical: kDefaultPadding,
+    return Column(
+      children: [
+        ProfileWidget(
+          user: user,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              height: size.height * 0.3,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: constraints.maxHeight * 0.65,
-                          width: constraints.maxWidth,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(29),
-                            color: Colors.white,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 40,
-                              ),
-                              Text(
-                                user.nombre ?? "",
-                                style: GoogleFonts.roboto(
-                                  fontSize: 20,
-                                  color: kSecondaryColor,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 2,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Column(
-                                    children: <Widget>[
-                                      Text(
-                                        "Completados",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 12,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        "10",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: kSecondaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Container(
-                                      height: 30,
-                                      width: 5,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          color: kSecondaryColor),
-                                    ),
-                                  ),
-                                  Column(
-                                    children: <Widget>[
-                                      Text(
-                                        "Favoritos",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        "4",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: kSecondaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(15),
-                                    child: Container(
-                                      height: 30,
-                                      width: 5,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          color: kSecondaryColor),
-                                    ),
-                                  ),
-                                  Column(
-                                    children: <Widget>[
-                                      Text(
-                                        "Rango",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        "1",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: kSecondaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: SizedBox(
-                            width: constraints.maxWidth * 0.3,
-                            child: Image.asset(
-                              "assets/images/d90.png",
-                              fit: BoxFit.fitWidth,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+        const SizedBox(height: 14),
+        buildName(user),
+        const SizedBox(height: 34),
+        ButtonWidget(
+          text: 'Salas favoritas',
+          icon: Icons.favorite,
+          onClicked: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => GridEscaperooms(
+                appbar: 0,
+                escaperoomSearch: const [],
+                escaperooms: escaperooms,
+                user: user,
+                filtro: "favoritas",
+                preferencias: false,
               ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              height: size.height * 0.4,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(29),
-                color: Colors.white,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: kDefaultPadding,
-              ),
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    "Salas favoritas",
-                    style: GoogleFonts.roboto(
-                      fontSize: 20,
-                      color: kSecondaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Meter foto de perfil  HeaderWithSearchBox(size: size),
-            // Meter datos de usuario TitleWithMoreBtn(title: "Cerca de ti", press: () {}),
-            // Meter botones de opciones para el usuario RecomendsEscaperooms(),
-            //  TitleWithMoreBtn(title: "Las más votadas", press: () {}),
-            //  FeaturedEscaperooms(),
-            SizedBox(height: kDefaultPadding),
-          ],
+            ));
+          },
         ),
-      ),
+        ButtonWidget(
+          text: 'Completadas',
+          icon: Icons.check,
+          onClicked: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => GridEscaperooms(
+                appbar: 0,
+                escaperoomSearch: const [],
+                escaperooms: escaperooms,
+                user: user,
+                filtro: "completadas",
+                preferencias: false,
+              ),
+            ));
+          },
+        ),
+        //Crear formulario de ajustes de usuario y pagina de detalles de reserva
+        ButtonWidget(
+          text: 'Ajustes',
+          icon: Icons.settings,
+          onClicked: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => Ajustes(
+                  user: user,
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
+
+  Widget buildName(Usuario user) => Column(
+        children: [
+          Text(
+            user.nombre,
+            style: GoogleFonts.ubuntu(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            user.email,
+            style: GoogleFonts.ubuntu(color: Colors.grey),
+          )
+        ],
+      );
 }

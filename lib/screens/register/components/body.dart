@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 import 'package:escape_life/components/my_divider.dart';
-import 'package:escape_life/components/or_divider.dart';
 import 'package:escape_life/db/firebase/user_auth.dart';
 import 'package:escape_life/components/round_button.dart';
 import 'package:escape_life/components/rounded_input_field.dart';
@@ -14,7 +13,12 @@ import '../../../constants.dart';
 
 class Body extends StatefulWidget {
   @override
-  _BodyState createState() => _BodyState();
+  State<Body> createState() => _BodyState();
+  const Body({
+    this.opcionesSeleccionadas,
+  });
+
+  final List<String> opcionesSeleccionadas;
 }
 
 class _BodyState extends State<Body> {
@@ -22,11 +26,14 @@ class _BodyState extends State<Body> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
+  final TextEditingController empresaController = TextEditingController();
 
   String nombre = '';
   String email = '';
   String password = '';
+  String empresa = '';
   String error = '';
+  bool admin = false;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -67,10 +74,23 @@ class _BodyState extends State<Body> {
               },
               icon: Icons.person,
             ),
+            admin
+                ? RoundedInputField(
+                    controller: empresaController,
+                    hintText: "Empresa",
+                    validator: (value) => value.isEmpty
+                        ? 'Introduce el nombre de tu empresa'
+                        : null,
+                    onChanged: (value) {
+                      setState(() => empresa = value);
+                    },
+                    icon: Icons.business,
+                  )
+                : SizedBox(),
             RoundedInputField(
               controller: emailController,
               hintText: "Correo electrónico",
-              validator: (value) => value.isEmpty ? 'Enter an email' : null,
+              validator: (value) => value.isEmpty ? 'Introduce un email' : null,
               onChanged: (value) {
                 setState(() => email = value);
               },
@@ -78,8 +98,10 @@ class _BodyState extends State<Body> {
             ),
             RoundPassInput(
               controller: passController,
-              validator: (value) =>
-                  value.length < 6 ? 'Enter a password 6+ chars long' : null,
+              hintText: "Contraseña",
+              validator: (value) => value.length < 6
+                  ? 'La contraseña debe de contener más de 6 caracteres'
+                  : null,
               onChanged: (value) {
                 setState(() => password = value);
               },
@@ -88,20 +110,30 @@ class _BodyState extends State<Body> {
               text: "Registrarse",
               press: () async {
                 if (_formKey.currentState.validate()) {
-                  dynamic result = await _auth.registerWithEmailAndPassword(
-                      nombre, email, password);
+                  dynamic result;
+                  if (admin) {
+                    result = await _auth.registerWithEmailAndPassword(
+                        nombre, email, password,
+                        empresa: empresa, isAdmin: admin);
+                  } else {
+                    result = await _auth.registerWithEmailAndPassword(
+                        nombre, email, password,
+                        opcionesSeleccionadas: widget.opcionesSeleccionadas);
+                  }
                   if (result == null) {
                     setState(() {
-                      error = 'Please supply a valid email';
+                      error = 'Introduce un email valido';
                       debugPrint(error);
                     });
                   } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeScreen(),
-                      ),
-                    );
+                    if (mounted) {
+                      final navigator = Navigator.of(context);
+                      await showDialog(
+                        context: context,
+                        builder: (_) => HomeScreen(),
+                      );
+                      navigator.pop();
+                    }
                   }
                 }
               },
@@ -117,24 +149,23 @@ class _BodyState extends State<Body> {
                 );
               },
             ),
-            OrDivider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
+              children: [
+                Checkbox(
+                  value: admin,
+                  onChanged: (value) => {
+                    setState(() => admin = !admin),
+                  },
                 ),
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
-                ),
-                Icon(
-                  Icons.facebook,
-                  color: Colors.white,
-                ),
+                Text(
+                  'Cuenta de admin',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )
               ],
-            ),
+            )
           ],
         ),
       ),

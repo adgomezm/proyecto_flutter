@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../constants.dart';
 
@@ -10,8 +11,7 @@ class TitleAndPrice extends StatelessWidget {
     this.price,
   }) : super(key: key);
 
-  final String title, country;
-  final int price;
+  final String title, country, price;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class TitleAndPrice extends StatelessWidget {
                 ),
                 TextSpan(
                   text: country,
-                  style: TextStyle(
+                  style: GoogleFonts.ubuntu(
                     fontSize: 20,
                     color: kSecondaryColor,
                     fontWeight: FontWeight.w300,
@@ -39,13 +39,15 @@ class TitleAndPrice extends StatelessWidget {
             ),
           ),
           Spacer(),
-          Text(
-            "$price€",
-            style: Theme.of(context)
-                .textTheme
-                .headline5
-                .copyWith(color: kSecondaryColor),
-          )
+          price != null
+              ? Text(
+                  "$price€",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline5
+                      .copyWith(color: kSecondaryColor),
+                )
+              : SizedBox(),
         ],
       ),
     );

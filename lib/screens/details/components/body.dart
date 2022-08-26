@@ -1,17 +1,25 @@
+import 'package:escape_life/db/entities/escaperoom.dart';
+import 'package:escape_life/db/entities/usuario.dart';
+import 'package:escape_life/functions/useful_functions.dart';
+import 'package:escape_life/screens/details/components/descripcion.dart';
+import 'package:escape_life/screens/reserve/reserve.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/constants.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'image_and_icons.dart';
 import 'title_and_price.dart';
 
 class Body extends StatefulWidget {
-  const Body({Key key, this.title, this.country, this.price, this.image})
-      : super(key: key);
+  const Body({
+    Key key,
+    this.escaperoom,
+    this.user,
+  }) : super(key: key);
+  final Usuario user;
+  final Escaperoom escaperoom;
 
-  final String title, country, image;
-  final int price;
   @override
-  _BodyState createState() => _BodyState();
+  State<Body> createState() => _BodyState();
 }
 
 class _BodyState extends State<Body> {
@@ -23,12 +31,14 @@ class _BodyState extends State<Body> {
         children: <Widget>[
           ImageAndIcons(
             size: size,
-            image: widget.image,
+            image: widget.escaperoom.imagen,
+            escaperoom: widget.escaperoom,
+            user: widget.user,
           ),
           TitleAndPrice(
-              title: widget.title,
-              country: widget.country,
-              price: widget.price),
+              title: widget.escaperoom.nombre,
+              country: capitalizeOnlyFirstLater(widget.escaperoom.ciudad),
+              price: widget.escaperoom.precio),
           Row(
             children: <Widget>[
               SizedBox(
@@ -43,10 +53,17 @@ class _BodyState extends State<Body> {
                     ),
                     primary: Colors.white,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => Reserves(
+                            user: widget.user, escaperoom: widget.escaperoom),
+                      ),
+                    );
+                  },
                   child: Text(
                     "Reservar",
-                    style: TextStyle(
+                    style: GoogleFonts.ubuntu(
                       color: Colors.white,
                       fontSize: 16,
                     ),
@@ -66,10 +83,17 @@ class _BodyState extends State<Body> {
                     primary: Colors.white,
                     backgroundColor: Colors.white,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => Descripcion(
+                            descripcion: widget.escaperoom.descripcion),
+                      ),
+                    );
+                  },
                   child: Text(
                     "Descripción",
-                    style: TextStyle(
+                    style: GoogleFonts.ubuntu(
                       color: kSecondaryColor,
                       fontSize: 16,
                     ),

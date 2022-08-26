@@ -1,4 +1,5 @@
 import 'package:escape_life/db/entities/escaperoom.dart';
+import 'package:escape_life/db/entities/usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/screens/details/details_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +9,15 @@ import 'package:escape_life/db/firebase/storage.dart';
 
 class RecomendsEscaperooms extends StatefulWidget {
   @override
-  _RecomendsEscaperoomsState createState() => _RecomendsEscaperoomsState();
+  State<RecomendsEscaperooms> createState() => _RecomendsEscaperoomsState();
+  const RecomendsEscaperooms({
+    Key key,
+    this.user,
+    this.preferencias,
+  }) : super(key: key);
+
+  final Usuario user;
+  final bool preferencias;
 }
 
 class _RecomendsEscaperoomsState extends State<RecomendsEscaperooms> {
@@ -24,7 +33,10 @@ class _RecomendsEscaperoomsState extends State<RecomendsEscaperooms> {
       child: Row(
         children: <Widget>[
           /*Recoger nombre y datos de cada ER de la DB*/
-          RecomendERCard(),
+          RecomendERCard(
+            user: widget.user,
+            preferencias: widget.preferencias,
+          ),
         ],
       ),
     );
@@ -33,25 +45,43 @@ class _RecomendsEscaperoomsState extends State<RecomendsEscaperooms> {
 
 class RecomendERCard extends StatefulWidget {
   @override
-  _RecomendERCardState createState() => _RecomendERCardState();
+  State<RecomendERCard> createState() => _RecomendERCardState();
+  const RecomendERCard({
+    Key key,
+    this.user,
+    this.preferencias,
+  }) : super(key: key);
+
+  final Usuario user;
+  final bool preferencias;
 }
 
 class _RecomendERCardState extends State<RecomendERCard> {
   @override
   Widget build(BuildContext context) {
-    final escaperooms = Provider.of<List<Escaperoom>>(context);
+    final escaperoomsDB = Provider.of<List<Escaperoom>>(context);
+    List<Escaperoom> escaperooms = widget.user.isAdmin
+        ? escaperoomsDB.where((i) => i.empresa == widget.user.empresa).toList()
+        : escaperoomsDB;
 
-    if (escaperooms == null) {
-      return SizedBox(
-        height: 400.0,
-        child: Text(
-          'No escaperooms yet!',
-          style: GoogleFonts.specialElite(
-            fontSize: 20,
-            color: Colors.white,
+    if (escaperooms.isEmpty || escaperooms == null) {
+      return Column(
+        children: [
+          SizedBox(
+            height: 50,
           ),
-          textAlign: TextAlign.center,
-        ),
+          Text(
+            'No hay escaperooms',
+            style: GoogleFonts.specialElite(
+              fontSize: 20,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: 50,
+          ),
+        ],
       );
     } else {
       return SizedBox(
@@ -62,12 +92,25 @@ class _RecomendERCardState extends State<RecomendERCard> {
   }
 
   Widget buildContent(List<Escaperoom> escaperooms) {
+    List<Escaperoom> escaperoomPR = [];
+    for (var element in widget.user.opcionesSeleccionadas) {
+      for (var escaperoom in escaperooms) {
+        if ((escaperoom.etiquetas.contains(element) ||
+                element == escaperoom.dificultad) &&
+            !escaperoomPR.contains(escaperoom)) {
+          escaperoomPR.add(escaperoom);
+        }
+      }
+    }
+    List<Escaperoom> escaperoomF =
+        widget.preferencias ? escaperoomPR : escaperooms;
+
     return ListView.builder(
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
-      itemCount: escaperooms.length,
+      itemCount: escaperoomF.length,
       itemBuilder: (BuildContext context, int index) {
-        final escaperoom = escaperooms[index];
+        final escaperoom = escaperoomF[index];
 
         return buildEscapeRoom(context, escaperoom);
       },
@@ -101,19 +144,27 @@ class _RecomendERCardState extends State<RecomendERCard> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailsScreen(
-                          title: escaperoom.nombre,
-                          country: escaperoom.ciudad,
-                          price: escaperoom.precio,
-                          image: escaperoom.imagen,
+                          escaperoom: escaperoom,
+                          user: widget.user,
                         ),
                       ),
                     );
                   },
-                  child: Image.network(
-                    snapshot.data,
-                    width: 300,
-                    height: size.height * 0.25,
-                    fit: BoxFit.fill,
+                  child: Container(
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                    ),
+                    child: Image.network(
+                      snapshot.data,
+                      width: 300,
+                      height: size.height * 0.25,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
               );
@@ -131,10 +182,8 @@ class _RecomendERCardState extends State<RecomendERCard> {
               context,
               MaterialPageRoute(
                 builder: (context) => DetailsScreen(
-                  title: escaperoom.nombre,
-                  country: escaperoom.ciudad,
-                  price: escaperoom.precio,
-                  image: escaperoom.imagen,
+                  escaperoom: escaperoom,
+                  user: widget.user,
                 ),
               ),
             );
@@ -169,7 +218,7 @@ class _RecomendERCardState extends State<RecomendERCard> {
                       ),
                       TextSpan(
                         text: escaperoom.ciudad.toUpperCase(),
-                        style: TextStyle(
+                        style: GoogleFonts.ubuntu(
                           color: kSecondaryColor,
                         ),
                       ),

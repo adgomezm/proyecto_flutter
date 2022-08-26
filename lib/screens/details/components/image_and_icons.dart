@@ -1,95 +1,104 @@
-import 'dart:ui';
-
+import 'package:escape_life/db/entities/escaperoom.dart';
+import 'package:escape_life/db/entities/usuario.dart';
+import 'package:escape_life/db/firebase/database.dart';
+import 'package:escape_life/functions/useful_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:escape_life/db/firebase/storage.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import '../../../constants.dart';
 import 'icon_card.dart';
 
 class ImageAndIcons extends StatefulWidget {
   const ImageAndIcons({
-    Key key,
     this.size,
     this.image,
-  }) : super(key: key);
+    this.escaperoom,
+    this.user,
+  });
+  final Usuario user;
   final Size size;
   final String image;
+  final Escaperoom escaperoom;
   @override
-  _ImageAndIconsState createState() => _ImageAndIconsState();
+  State<ImageAndIcons> createState() => _ImageAndIconsState();
 }
 
 class _ImageAndIconsState extends State<ImageAndIcons> {
+  bool pressed;
   @override
   void initState() {
     super.initState();
-    // Get reference to an already opened box
+    pressed =
+        widget.user.favoritas.contains(widget.escaperoom.id) ? true : false;
   }
 
   final Storage storage = Storage();
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: kDefaultPadding * 0.9),
       child: SizedBox(
-        height: widget.size.height * 0.85,
+        height: widget.size.height * 0.81,
         child: Row(
           children: <Widget>[
             Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: kDefaultPadding * 1.3),
-                child: Column(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  IconCard(icon: Icons.timer),
+                  Text(
+                    widget.escaperoom.tiempo,
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
                     ),
-                    Spacer(),
-                    IconCard(icon: Icons.timer),
-                    Text(
-                      "60-90 min",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                      ),
+                  ),
+                  IconCard(icon: Icons.graphic_eq),
+                  Text(
+                    capitalizeOnlyFirstLater(widget.escaperoom.dificultad),
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
                     ),
-                    IconCard(icon: Icons.graphic_eq),
-                    Text(
-                      "Nivel medio",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                      ),
+                  ),
+                  IconCard(icon: Icons.people),
+                  Text(
+                    "${widget.escaperoom.jugadoresMin} - ${widget.escaperoom.jugadoresMax}",
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
                     ),
-                    IconCard(icon: Icons.people),
-                    Text(
-                      "2-6 jugadores",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                      ),
+                  ),
+                  IconCard(icon: Icons.location_on),
+                  Text(
+                    capitalizeOnlyFirstLater(widget.escaperoom.ciudad),
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
                     ),
-                    IconCard(icon: Icons.location_on),
-                    Text(
-                      "Ubicación",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                      ),
+                  ),
+                  IconCard(
+                    icon: pressed ? Icons.star : Icons.star_border,
+                    onPressed: () {
+                      setState(() {
+                        pressed = !pressed;
+                      });
+                      pressed
+                          ? DatabaseService().addArrayData("favoritas",
+                              widget.escaperoom.id, widget.user.uid)
+                          : DatabaseService().removeArrayData("favoritas",
+                              widget.escaperoom.id, widget.user.uid);
+                    },
+                  ),
+                  Text(
+                    !pressed ? "Añadir a favoritos" : "Quitar de favoritos",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             FutureBuilder(

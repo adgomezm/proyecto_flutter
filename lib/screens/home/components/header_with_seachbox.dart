@@ -1,20 +1,36 @@
+import 'package:escape_life/db/firebase/database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants.dart';
+import '../../../db/entities/escaperoom.dart';
 
-class HeaderWithSearchBox extends StatelessWidget {
+class HeaderWithSearchBox extends StatefulWidget {
   const HeaderWithSearchBox({
     Key key,
     @required this.size,
+    this.escaperoomSearch,
+    this.myController,
   }) : super(key: key);
+  final TextEditingController myController;
 
+  final List<Escaperoom> escaperoomSearch;
   final Size size;
 
   @override
+  State<HeaderWithSearchBox> createState() => _HeaderWithSearchBoxState();
+}
+
+class _HeaderWithSearchBoxState extends State<HeaderWithSearchBox> {
+  @override
   Widget build(BuildContext context) {
+    final dbService = DatabaseService();
+    final escaperooms = Provider.of<List<Escaperoom>>(context);
+
     return SizedBox(
       // It will cover 20% of our total height
-      height: size.height * 0.22,
+      height: widget.size.height * 0.22,
       child: Stack(
         children: <Widget>[
           Container(
@@ -23,7 +39,7 @@ class HeaderWithSearchBox extends StatelessWidget {
               right: kDefaultPadding,
               bottom: kDefaultPadding,
             ),
-            height: size.height * 0.25 - 27,
+            height: widget.size.height * 0.25 - 27,
             decoration: BoxDecoration(
               color: kPrimaryColor,
               borderRadius: BorderRadius.only(
@@ -35,15 +51,15 @@ class HeaderWithSearchBox extends StatelessWidget {
           Positioned(
             bottom: 120,
             left: 20,
+            width: widget.size.width * 0.9,
             child: Text(
               "Tu buscador de Escape Rooms en España",
-              style: TextStyle(
+              style: GoogleFonts.ubuntu(
                 fontSize: 19,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            width: size.width * 0.9,
           ),
           Positioned(
             bottom: 40,
@@ -62,10 +78,13 @@ class HeaderWithSearchBox extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
-                      onChanged: (value) {},
+                      onChanged: (value) {
+                        dbService.setSearchParam(value, escaperooms);
+                      },
+                      controller: widget.myController,
                       decoration: InputDecoration(
                         hintText: "Search",
-                        hintStyle: TextStyle(
+                        hintStyle: GoogleFonts.ubuntu(
                           color: kPrimaryColor.withOpacity(0.5),
                         ),
                         enabledBorder: InputBorder.none,
